@@ -1,18 +1,11 @@
-# docker_homework
-# 1 Лекция
-Написать Dockerfile для frontend располагается в директории /frontend, собрать и запустить
-# 2 Лекция
-Написать Dockerfile для backend который располагается в директории /lib_catalog(для сборки контейнера необходимо использовать файл /lib_catalog/requirements.txt), для работы backend необходим postgresql, т.е. необходимо собрать 2 контейнера:
-1. backend
-2. postgresql
+Create network for backend and database
+docker network create --subnet 172.21.0.0/24 --gateway=172.21.0.1 --ip-range 172.21.0.0/24 --label=backend_db_net backend_db_net
 
-Осуществить сетевые настройки, для работы связки backend и postgresql
-# 3 Лекция
-Написать docker-compose.yaml, для всего проекта, собрать и запустить
+Build image for backend
+docker build -t back_app_upd -f Dockerfile_back .
 
-# Критерий оценки финального задания
-1. Dockerfile должны быть написаны согласно пройденным best practices
-2. Для docker-compose необходимо использовать локальное image registry
-3. В docker-compose необходимо сетевые настройки 2 разных интерфейса(bridge), 1 - для фронта, 2 - для бека с postgresql
+Download and start database with credentials and network
+docker run -d --name database --net backend_db_net --ip=172.21.0.2 -e POSTGRES_USER=django -e POSTGRES_PASSWORD=django  -e POSTGRES_NAME=django postgres:alpine3.14
 
-4.* Осущиствить сборку проекта самим docker-compose команда docker-compose build(при использовании этого подхода необходимо исключить 2 пункт из критерии оценки)
+Start backend Image
+docker run -d -p 8080:8000 --name back_app_fin --net backend_db_net --ip=172.21.0.3 back_app_upd
