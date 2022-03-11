@@ -1,0 +1,56 @@
+version: "3.8"
+services:
+  database:
+    restart: always
+    image: "postgres:13"
+    container_name: database
+    environment:
+      - POSTGRES_USER=django
+      - POSTGRES_PASSWORD=django
+      - POSTGRES_NAME=django
+    ports:
+      - "5432"
+    networks:
+      - back
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  backend:
+    restart: always
+    container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile_back
+    ports:
+      - "8000"
+    depends_on:
+      - database
+    networks:
+      - back
+  frontend:
+    restart: always
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+      - backend
+    networks:
+      - front
+      - back
+networks:
+   front:
+      driver: bridge
+      ipam: 
+        config:
+           - subnet: 172.21.0.0/24
+             gateway: 172.21.0.1
+   back:
+      driver: bridge
+      ipam:
+        config:
+           - subnet: 172.21.1.0/24
+             gateway: 172.21.1.1
